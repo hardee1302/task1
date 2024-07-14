@@ -1,0 +1,54 @@
+pipeline {
+    agent any
+
+    environment {
+        MAVEN_HOME = '/opt/maven'
+        JAVA_HOME = '/usr/lib/jvm/java-17-amazon-corretto.x86_64'
+        PATH = "${env.PATH}:${MAVEN_HOME}/bin:${JAVA_HOME}/bin"
+    }
+
+    stages {
+        stage('Source Code Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/akramdevopstrainer/maven-app.git'
+            }
+        }
+        stage('Source Code Build - Maven') {
+            steps {
+                dir('maven-web-app-master') {
+                    script {
+                        sh 'mvn clean install'
+                    }
+                }
+            }
+        }
+        stage('Source Code Testing - SonarQube') {
+            steps {
+                dir('maven-web-app-master') {
+                    script {
+                        sh '''
+                        mvn clean verify sonar:sonar \
+                            -Dsonar.projectKey=aws-project \
+                            -Dsonar.host.url=http://18.233.65.55:9000 \
+                            -Dsonar.login=28db290a42f4849c7270a6be1b4fd9649063cf01
+                        '''
+                    }
+                }
+            }
+        }
+        stage('Source Code Deployment - Ansible') {
+            steps {
+                script {
+                    sh 'touch abc'
+                }
+            }
+        }
+        stage('Source Code Install - AWS CLI') {
+            steps {
+                script {
+                    sh 'touch xyz'
+                }
+            }
+        }
+    }
+}
